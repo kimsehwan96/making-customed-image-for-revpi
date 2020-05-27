@@ -75,6 +75,7 @@ fi
 cp $BAKERYDIR/templates/cmdline.txt $IMAGEDIR/boot
 cp $BAKERYDIR/templates/revpi-aliases.sh $IMAGEDIR/etc/profile.d
 cp $BAKERYDIR/templates/rsyslog.conf $IMAGEDIR/etc
+cp $BAKERYDIR/templates/98-rpi.conf $IMAGEDIR/etc/sysctl.d
 
 # force HDMI mode even if no HDMI monitor is detected
 sed -r -i -e 's/#hdmi_force_hotplug=1/hdmi_force_hotplug=1/' \
@@ -113,7 +114,11 @@ chmod -R a+rX $IMAGEDIR/home/pi/demo
 rm -r $PICONTROLDIR
 
 # customize settings
-echo Europe/Berlin > $IMAGEDIR/etc/timezone
+
+#echo Europe/Berlin > $IMAGEDIR/etc/timezone 
+#We will use Time zone Asia/Seoul
+echo Asia/Seoul > $IMAGEDIR/etc/timezone
+
 rm $IMAGEDIR/etc/localtime
 echo RevPi > $IMAGEDIR/etc/hostname
 sed -i -e 's/raspberrypi/RevPi/g' $IMAGEDIR/etc/hosts
@@ -121,7 +126,8 @@ if ! grep -qE '^i2c-dev$' $IMAGEDIR/etc/modules ; then
 	echo i2c-dev >> $IMAGEDIR/etc/modules
 fi
 echo piControl >> $IMAGEDIR/etc/modules
-sed -i -r -e 's/^(XKBLAYOUT).*/\1="de"/'		\
+#sed -i -r -e 's/^(XKBLAYOUT).*/\1="de"/'		\
+sed -i -r -e 's/^(XKBLAYOUT).*/\1="us"/'		\ #we will use us keyboard
 	  -e 's/^(XKBVARIANT).*/\1="nodeadkeys"/'	\
 	  $IMAGEDIR/etc/default/keyboard
 install -d -m 755 -o root -g root $IMAGEDIR/etc/revpi
