@@ -9,8 +9,11 @@
   hardlink, symlink protection 및 cgroup enable, ggc group & ggc user adding
 
 
-Create custom images for Revolution Pi
 
+
+# Origina README
+
+Create custom images for Revolution Pi
 Intended usage:
 
 * Download Raspbian image, works with both desktop and lite images:
