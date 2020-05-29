@@ -31,3 +31,5 @@ Intended usage:
 * Collect sources on a physical medium for GPL compliance
   (requires root and Internet connectivity):
   collect_sources.sh <raspbian-image> /media/usbstick
+
+--> http://downloads.raspberrypi.org/raspbian/images/raspbian-2020-02-14/2020-02-13-raspbian-buster.zip

@@ -125,9 +125,10 @@ sed -i -e 's/raspberrypi/RevPi/g' $IMAGEDIR/etc/hosts
 if ! grep -qE '^i2c-dev$' $IMAGEDIR/etc/modules ; then
 	echo i2c-dev >> $IMAGEDIR/etc/modules
 fi
+#we will use us keyboard
 echo piControl >> $IMAGEDIR/etc/modules
 #sed -i -r -e 's/^(XKBLAYOUT).*/\1="de"/'		\
-sed -i -r -e 's/^(XKBLAYOUT).*/\1="us"/'		\ #we will use us keyboard
+sed -i -r -e 's/^(XKBLAYOUT).*/\1="us"/'		\
 	  -e 's/^(XKBVARIANT).*/\1="nodeadkeys"/'	\
 	  $IMAGEDIR/etc/default/keyboard
 install -d -m 755 -o root -g root $IMAGEDIR/etc/revpi
