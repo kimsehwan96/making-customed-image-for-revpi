@@ -1,9 +1,9 @@
-#this sources cloned from Kunbus
+# this sources cloned from Kunbus
   Revoulution Pi 용 커스텀 이미지 제작.
 
   Greengrass 환경을 셋업하기 위해서는 Python3.7 이상의 버전 및 각종 templates 대치 필요.
 
-#making_gg_env.sh
+# making_gg_env.sh
   revolution pi 및 raspberry pi를 위한 greengrass 환경 셋업 script
   Python3.7.2 버전 자동 인스톨 빌드(ssl import error 해결)
   hardlink, symlink protection 및 cgroup enable, ggc group & ggc user adding
