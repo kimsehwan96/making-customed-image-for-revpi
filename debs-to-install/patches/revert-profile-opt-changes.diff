@@ -1,0 +1,189 @@
+--- a/Lib/_osx_support.py
++++ b/Lib/_osx_support.py
+@@ -17,7 +17,7 @@ __all__ = [
+ _UNIVERSAL_CONFIG_VARS = ('CFLAGS', 'LDFLAGS', 'CPPFLAGS', 'BASECFLAGS',
+                             'BLDSHARED', 'LDSHARED', 'CC', 'CXX',
+                             'PY_CFLAGS', 'PY_LDFLAGS', 'PY_CPPFLAGS',
+-                            'PY_CORE_CFLAGS', 'PY_CORE_LDFLAGS')
++                            'PY_CORE_CFLAGS')
+ 
+ # configuration variables that may contain compiler calls
+ _COMPILER_CONFIG_VARS = ('BLDSHARED', 'LDSHARED', 'CC', 'CXX')
+--- a/Lib/test/pythoninfo.py
++++ b/Lib/test/pythoninfo.py
+@@ -407,10 +407,7 @@ def collect_sysconfig(info_add):
+         'OPT',
+         'PY_CFLAGS',
+         'PY_CFLAGS_NODIST',
+-        'PY_CORE_LDFLAGS',
+         'PY_LDFLAGS',
+-        'PY_LDFLAGS_NODIST',
+-        'PY_STDMODULE_CFLAGS',
+         'Py_DEBUG',
+         'Py_ENABLE_SHARED',
+         'SHELL',
+--- a/Lib/test/test__osx_support.py
++++ b/Lib/test/test__osx_support.py
+@@ -24,7 +24,7 @@ class Test_OSXSupport(unittest.TestCase)
+         for cv in ('CFLAGS', 'LDFLAGS', 'CPPFLAGS',
+                             'BASECFLAGS', 'BLDSHARED', 'LDSHARED', 'CC',
+                             'CXX', 'PY_CFLAGS', 'PY_LDFLAGS', 'PY_CPPFLAGS',
+-                            'PY_CORE_CFLAGS', 'PY_CORE_LDFLAGS'):
++                            'PY_CORE_CFLAGS'):
+             if cv in self.env:
+                 self.env.unset(cv)
+ 
+--- a/Makefile.pre.in
++++ b/Makefile.pre.in
+@@ -85,10 +85,6 @@ CONFIGURE_CFLAGS=	@CFLAGS@
+ # Use it when a compiler flag should _not_ be part of the distutils CFLAGS
+ # once Python is installed (Issue #21121).
+ CONFIGURE_CFLAGS_NODIST=@CFLAGS_NODIST@
+-# LDFLAGS_NODIST is used in the same manner as CFLAGS_NODIST.
+-# Use it when a linker flag should _not_ be part of the distutils LDFLAGS
+-# once Python is installed (bpo-35257)
+-CONFIGURE_LDFLAGS_NODIST=@LDFLAGS_NODIST@
+ CONFIGURE_CPPFLAGS=	@CPPFLAGS@
+ CONFIGURE_LDFLAGS=	@LDFLAGS@
+ # Avoid assigning CFLAGS, LDFLAGS, etc. so users can use them on the
+@@ -101,7 +97,6 @@ PY_CFLAGS_NODIST=$(CONFIGURE_CFLAGS_NODI
+ # environment variables
+ PY_CPPFLAGS=	$(BASECPPFLAGS) -I. -I$(srcdir)/Include $(CONFIGURE_CPPFLAGS) $(CPPFLAGS)
+ PY_LDFLAGS=	$(CONFIGURE_LDFLAGS) $(LDFLAGS)
+-PY_LDFLAGS_NODIST=$(CONFIGURE_LDFLAGS_NODIST) $(LDFLAGS_NODIST)
+ NO_AS_NEEDED=	@NO_AS_NEEDED@
+ LDLAST=		@LDLAST@
+ SGI_ABI=	@SGI_ABI@
+@@ -114,8 +109,6 @@ CFLAGSFORSHARED=@CFLAGSFORSHARED@
+ PY_STDMODULE_CFLAGS= $(PY_CFLAGS) $(PY_CFLAGS_NODIST) $(PY_CPPFLAGS) $(CFLAGSFORSHARED)
+ PY_BUILTIN_MODULE_CFLAGS= $(PY_STDMODULE_CFLAGS) -DPy_BUILD_CORE_BUILTIN
+ PY_CORE_CFLAGS=	$(PY_STDMODULE_CFLAGS) -DPy_BUILD_CORE
+-# Linker flags used for building the interpreter object files
+-PY_CORE_LDFLAGS=$(PY_LDFLAGS) $(PY_LDFLAGS_NODIST)
+ # Strict or non-strict aliasing flags used to compile dtoa.c, see above
+ CFLAGS_ALIASING=@CFLAGS_ALIASING@
+ 
+@@ -155,7 +148,7 @@ CONFINCLUDEPY=	$(CONFINCLUDEDIR)/python$
+ SHLIB_SUFFIX=	@SHLIB_SUFFIX@
+ EXT_SUFFIX=	@EXT_SUFFIX@
+ LDSHARED=	@LDSHARED@ $(PY_LDFLAGS)
+-BLDSHARED=	@BLDSHARED@ $(PY_CORE_LDFLAGS)
++BLDSHARED=	@BLDSHARED@ $(PY_LDFLAGS)
+ LDCXXSHARED=	@LDCXXSHARED@
+ DESTSHARED=	$(BINLIBDEST)/lib-dynload
+ 
+@@ -504,7 +497,7 @@ profile-run-stamp:
+ 	touch $@
+ 
+ build_all_generate_profile:
+-	$(MAKE) @DEF_MAKE_RULE@ CFLAGS_NODIST="$(CFLAGS_NODIST) $(PGO_PROF_GEN_FLAG)" LDFLAGS_NODIST="$(LDFLAGS_NODIST) $(PGO_PROF_GEN_FLAG)" LIBS="$(LIBS)"
++	$(MAKE) @DEF_MAKE_RULE@ CFLAGS_NODIST="$(CFLAGS) $(PGO_PROF_GEN_FLAG)" LDFLAGS="$(LDFLAGS) $(PGO_PROF_GEN_FLAG)" LIBS="$(LIBS)"
+ 
+ run_profile_task:
+ 	@ # FIXME: can't run for a cross build
+@@ -518,7 +511,7 @@ build_all_merge_profile:
+ profile-opt: profile-run-stamp
+ 	@echo "Rebuilding with profile guided optimizations:"
+ 	-rm -f profile-clean-stamp
+-	$(MAKE) @DEF_MAKE_RULE@ CFLAGS_NODIST="$(CFLAGS_NODIST) $(PGO_PROF_USE_FLAG)" LDFLAGS_NODIST="$(LDFLAGS_NODIST)"
++	$(MAKE) @DEF_MAKE_RULE@ CFLAGS_NODIST="$(CFLAGS) $(PGO_PROF_USE_FLAG)" LDFLAGS="$(LDFLAGS)"
+ 
+ # Compile and run with gcov
+ .PHONY=coverage coverage-lcov coverage-report
+@@ -575,7 +568,7 @@ clinic: check-clean-src $(srcdir)/Module
+ 
+ # Build the interpreter
+ $(BUILDPYTHON):	Programs/python.o $(LIBRARY) $(LDLIBRARY) $(PY3LIBRARY)
+-	$(LINKCC) $(PY_CORE_LDFLAGS) $(LINKFORSHARED) -o $@ Programs/python.o $(BLDLIBRARY) $(LIBS) $(MODLIBS) $(SYSLIBS) $(LDLAST)
++	$(LINKCC) $(PY_LDFLAGS) $(LINKFORSHARED) -o $@ Programs/python.o $(BLDLIBRARY) $(LIBS) $(MODLIBS) $(SYSLIBS) $(LDLAST)
+ 
+ platform: $(BUILDPYTHON) pybuilddir.txt
+ 	$(RUNSHARED) $(PYTHON_FOR_BUILD) -c 'import sys ; from sysconfig import get_platform ; print("%s-%d.%d" % (get_platform(), *sys.version_info[:2]))' >platform
+@@ -640,7 +633,7 @@ libpython3.so:	libpython$(LDVERSION).so
+ 	$(BLDSHARED) $(NO_AS_NEEDED) -o $@ -Wl,-h$@ $^
+ 
+ libpython$(LDVERSION).dylib: $(LIBRARY_OBJS)
+-	 $(CC) -dynamiclib -Wl,-single_module $(PY_CORE_LDFLAGS) -undefined dynamic_lookup -Wl,-install_name,$(prefix)/lib/libpython$(LDVERSION).dylib -Wl,-compatibility_version,$(VERSION) -Wl,-current_version,$(VERSION) -o $@ $(LIBRARY_OBJS) $(SHLIBS) $(LIBC) $(LIBM) $(LDLAST); \
++	 $(CC) -dynamiclib -Wl,-single_module $(PY_LDFLAGS) -undefined dynamic_lookup -Wl,-install_name,$(prefix)/lib/libpython$(LDVERSION).dylib -Wl,-compatibility_version,$(VERSION) -Wl,-current_version,$(VERSION) -o $@ $(LIBRARY_OBJS) $(SHLIBS) $(LIBC) $(LIBM) $(LDLAST); \
+ 
+ 
+ libpython$(VERSION).sl: $(LIBRARY_OBJS)
+@@ -665,7 +658,7 @@ $(PYTHONFRAMEWORKDIR)/Versions/$(VERSION
+ 		$(LIBRARY) \
+ 		$(RESSRCDIR)/Info.plist
+ 	$(INSTALL) -d -m $(DIRMODE) $(PYTHONFRAMEWORKDIR)/Versions/$(VERSION)
+-	$(CC) -o $(LDLIBRARY) $(PY_CORE_LDFLAGS) -dynamiclib \
++	$(CC) -o $(LDLIBRARY) $(PY_LDFLAGS) -dynamiclib \
+ 		-all_load $(LIBRARY) -Wl,-single_module \
+ 		-install_name $(DESTDIR)$(PYTHONFRAMEWORKINSTALLDIR)/Versions/$(VERSION)/$(PYTHONFRAMEWORK) \
+ 		-compatibility_version $(VERSION) \
+@@ -716,7 +709,7 @@ Modules/Setup: $(srcdir)/Modules/Setup.d
+ 	fi
+ 
+ Programs/_testembed: Programs/_testembed.o $(LIBRARY) $(LDLIBRARY) $(PY3LIBRARY)
+-	$(LINKCC) $(PY_CORE_LDFLAGS) $(LINKFORSHARED) -o $@ Programs/_testembed.o $(BLDLIBRARY) $(LIBS) $(MODLIBS) $(SYSLIBS) $(LDLAST)
++	$(LINKCC) $(PY_LDFLAGS) $(LINKFORSHARED) -o $@ Programs/_testembed.o $(BLDLIBRARY) $(LIBS) $(MODLIBS) $(SYSLIBS) $(LDLAST)
+ 
+ ############################################################################
+ # Importlib
+@@ -724,7 +717,7 @@ Programs/_testembed: Programs/_testembed
+ Programs/_freeze_importlib.o: Programs/_freeze_importlib.c Makefile
+ 
+ Programs/_freeze_importlib: Programs/_freeze_importlib.o $(LIBRARY_OBJS_OMIT_FROZEN)
+-	$(LINKCC) $(PY_CORE_LDFLAGS) -o $@ Programs/_freeze_importlib.o $(LIBRARY_OBJS_OMIT_FROZEN) $(LIBS) $(MODLIBS) $(SYSLIBS) $(LDLAST)
++	$(LINKCC) $(PY_LDFLAGS) -o $@ Programs/_freeze_importlib.o $(LIBRARY_OBJS_OMIT_FROZEN) $(LIBS) $(MODLIBS) $(SYSLIBS) $(LDLAST)
+ 
+ .PHONY: regen-importlib
+ regen-importlib: Programs/_freeze_importlib
+@@ -806,7 +799,7 @@ Python/sysmodule.o: $(srcdir)/Python/sys
+ $(IO_OBJS): $(IO_H)
+ 
+ $(PGEN): $(PGENOBJS)
+-		$(CC) $(OPT) $(PY_CORE_LDFLAGS) $(PGENOBJS) $(LIBS) -o $(PGEN)
++		$(CC) $(OPT) $(PY_LDFLAGS) $(PGENOBJS) $(LIBS) -o $(PGEN)
+ 
+ .PHONY: regen-grammar
+ regen-grammar: $(PGEN)
+--- a/configure.ac
++++ b/configure.ac
+@@ -1395,7 +1395,7 @@ if test "$Py_LTO" = 'true' ; then
+   fi
+ 
+   CFLAGS_NODIST="$CFLAGS_NODIST $LTOFLAGS"
+-  LDFLAGS_NODIST="$LDFLAGS_NODIST $LTOFLAGS"
++  LDFLAGS="$LDFLAGS $LTOFLAGS"
+ fi
+ 
+ # Enable PGO flags.
+@@ -1555,7 +1555,6 @@ fi
+ 
+ AC_SUBST(BASECFLAGS)
+ AC_SUBST(CFLAGS_NODIST)
+-AC_SUBST(LDFLAGS_NODIST)
+ 
+ # The -arch flags for universal builds on OSX
+ UNIVERSAL_ARCH_FLAGS=
+--- a/setup.py
++++ b/setup.py
+@@ -18,16 +18,11 @@ from distutils.spawn import find_executa
+ 
+ cross_compiling = "_PYTHON_HOST_PLATFORM" in os.environ
+ 
+-# Set common compiler and linker flags derived from the Makefile,
+-# reserved for building the interpreter and the stdlib modules.
+-# See bpo-21121 and bpo-35257
+-def set_compiler_flags(compiler_flags, compiler_py_flags_nodist):
+-    flags = sysconfig.get_config_var(compiler_flags)
+-    py_flags_nodist = sysconfig.get_config_var(compiler_py_flags_nodist)
+-    sysconfig.get_config_vars()[compiler_flags] = flags + ' ' + py_flags_nodist
+-
+-set_compiler_flags('CFLAGS', 'PY_CFLAGS_NODIST')
+-set_compiler_flags('LDFLAGS', 'PY_LDFLAGS_NODIST')
++# Add special CFLAGS reserved for building the interpreter and the stdlib
++# modules (Issue #21121).
++cflags = sysconfig.get_config_var('CFLAGS')
++py_cflags_nodist = sysconfig.get_config_var('PY_CFLAGS_NODIST')
++sysconfig.get_config_vars()['CFLAGS'] = cflags + ' ' + py_cflags_nodist
+ 
+ class Dummy:
+     """Hack for parallel build"""

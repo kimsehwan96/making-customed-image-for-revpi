@@ -74,6 +74,7 @@ fi
 
 sudo rm -rf $PWD/python_src/Python-3.7.2
 sudo rm -rf $PWD/python_src/Python-3.7.2.tar.xz
+sudo rm -rf $PWD/python_src
 
 #below lines are modifying some files....
 

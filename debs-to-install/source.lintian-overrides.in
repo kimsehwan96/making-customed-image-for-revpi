@@ -1,0 +1,5 @@
+# generated during the build
+@PVER@ source: quilt-build-dep-but-no-series-file
+
+# wininst binaries included upstream, buildable with mingw64, not shipped
+@PVER@ source: source-contains-prebuilt-windows-binary

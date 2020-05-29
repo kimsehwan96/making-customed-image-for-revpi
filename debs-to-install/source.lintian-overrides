@@ -1,0 +1,5 @@
+# generated during the build
+python3.7 source: quilt-build-dep-but-no-series-file
+
+# wininst binaries included upstream, buildable with mingw64, not shipped
+python3.7 source: source-contains-prebuilt-windows-binary

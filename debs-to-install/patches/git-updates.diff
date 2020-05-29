@@ -1,0 +1,4 @@
+# DP: updates from the 3.7 branch (until 2019-xx-yy).
+
+# git diff --no-renames 9a3ffc0492d1310ead9ce8f5ee678c26b20a338d e5897b67badeb04a04e16e29f7650d833141d67e | filterdiff -x ?/.hgignore -x ?/.hgeol -x ?/.hgtags -x ?/.hgtouch -x ?/.gitignore -x ?/.gitattributes -x '?/.github/*' -x '?/.git*' -x ?/.codecov.yml -x ?/.travis.yml -x ?/configure --remove-timestamps
+
